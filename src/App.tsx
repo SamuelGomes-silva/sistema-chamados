@@ -1,9 +1,9 @@
-export default function App() {
-	return (
-		<>
-			<div>
-				<h1>Sistema chamados</h1>
-			</div>
-		</>
-	);
-}
+import { createBrowserRouter } from "react-router-dom";
+import Login from "./pages/login";
+import Home from "./pages/home";
+
+const router = createBrowserRouter([
+	{ path: "/", element: <Login /> },
+	{ path: "/dashboard", element: <Home /> },
+]);
+export default router;
