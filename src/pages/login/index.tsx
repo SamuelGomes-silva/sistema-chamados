@@ -1,11 +1,56 @@
-import { useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import logo from "../../assets/logo.png";
+import { AuthContext } from "../../contexts/auth.context";
+import Input from "../../components/input";
+import { useForm, type FieldErrors } from "react-hook-form";
+import {
+	signinSchema,
+	signupSchema,
+	type SigninData,
+	type SignupData,
+} from "./schemas";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+type loginSchema = SigninData | SignupData;
+type FormData = loginSchema;
+type FormType = "login" | "signup";
 
 export default function Login() {
+	const {} = useContext(AuthContext)!; //obs o ! força dizendo que não é undefined
 	const [isLogin, setIslogin] = useState<boolean>(true);
+	const [formType, setFormType] = useState<FormType>("login");
+
+	const schema = useMemo(() => {
+		return formType === "login" ? signinSchema : signupSchema;
+	}, [formType]);
+
+	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+		reset,
+	} = useForm<SigninData | SignupData>({
+		resolver: zodResolver(schema),
+	});
+
 	function handleStatusLogin() {
-		setIslogin(!isLogin);
+		setIslogin((prev) => {
+			const newState = !prev;
+			setFormType(newState ? "login" : "signup");
+			reset();
+			return newState;
+		});
 	}
+
+	function ErrorMessage({ message }: { message?: string }) {
+		return (
+			<p className="text-red-500 font-semibold w-full transition-all duration-500  max-w-96">
+				{message}
+			</p>
+		);
+	}
+
+	async function onSubmit(data: FormData) {}
 	return (
 		<>
 			<main className="flex bg-zinc-900 h-dvh w-dvw p-8">
@@ -18,25 +63,43 @@ export default function Login() {
 						/>
 					</div>
 					<div className="flex  flex-col justify-center items-center px-5 py-10 w-full ">
-						<form className="flex flex-col w-full justify-center items-center">
-							{!isLogin && (
-								<input
-									placeholder="nome"
-									type="text"
-									className="bg-white w-full max-w-96 mt-3 mb-1.5 h-10 px-3 rounded-sm outline-none border border-transparent focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-500"
-								/>
+						<form
+							key={formType}
+							className="flex flex-col w-full justify-center items-center"
+							onSubmit={handleSubmit(onSubmit)}
+						>
+							{formType === "signup" && (
+								<>
+									<Input
+										{...register("name")}
+										placeholder="Nome"
+										type="text"
+										errors={
+											(errors as FieldErrors<SignupData>).name?.message
+												? true
+												: false
+										}
+									/>
+									<ErrorMessage
+										message={(errors as FieldErrors<SignupData>).name?.message}
+									/>
+								</>
 							)}
-							<input
-								placeholder="email"
+							<Input
+								placeholder="Email"
 								type="email"
-								className="bg-white w-full max-w-96 mt-3 mb-1.5 h-10 px-3 rounded-sm outline-none border border-transparent focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-500"
+								{...register("email")}
+								errors={errors.email?.message ? true : false}
 							/>
-							<input
+							<ErrorMessage message={errors.email?.message} />
+							<Input
 								type="password"
 								autoComplete="new-password"
-								placeholder="senha"
-								className="bg-white w-full max-w-96 mt-3 mb-1.5 h-10 px-3 rounded-sm outline-none border border-transparent focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-500"
+								placeholder="Senha"
+								{...register("password")}
+								errors={errors.password?.message ? true : false}
 							/>
+							<ErrorMessage message={errors.password?.message} />
 							<button
 								type="submit"
 								className="bg-blue-950 text-white font-bold text-xl h-10  w-full max-w-96 mt-3 mb-3 rounded-sm py-1 cursor-pointer hover:border-2 border-gray-400 hover:bg-blue-800 transition-all duration-500"
