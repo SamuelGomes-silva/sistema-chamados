@@ -10,13 +10,14 @@ import {
 	type SignupData,
 } from "./schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "react-toastify";
 
 type loginSchema = SigninData | SignupData;
 type FormData = loginSchema;
 type FormType = "login" | "signup";
 
 export default function Login() {
-	const {} = useContext(AuthContext)!; //obs o ! força dizendo que não é undefined
+	const { handleSignIn, handleSignUp } = useContext(AuthContext)!; //obs o ! força dizendo que não é undefined
 	const [isLogin, setIslogin] = useState<boolean>(true);
 	const [formType, setFormType] = useState<FormType>("login");
 
@@ -50,7 +51,23 @@ export default function Login() {
 		);
 	}
 
-	async function onSubmit(data: FormData) {}
+	async function onSubmit(data: FormData) {
+		if (data === null) return;
+		if (isLogin) {
+			const login = await handleSignIn(data);
+			if (login) {
+				toast.success("Logado com sucesso!");
+				return;
+			}
+		} else if (!isLogin && formType === "signup") {
+			const signup = await handleSignUp(data as SignupData);
+			if (signup) {
+				toast.success("Conta criada com sucesso!");
+				return;
+			}
+		}
+	}
+
 	return (
 		<>
 			<main className="flex bg-zinc-900 h-dvh w-dvw p-8">
@@ -74,6 +91,7 @@ export default function Login() {
 										{...register("name")}
 										placeholder="Nome"
 										type="text"
+										autoComplete="off"
 										errors={
 											(errors as FieldErrors<SignupData>).name?.message
 												? true
@@ -88,6 +106,7 @@ export default function Login() {
 							<Input
 								placeholder="Email"
 								type="email"
+								autoComplete="email"
 								{...register("email")}
 								errors={errors.email?.message ? true : false}
 							/>
