@@ -11,6 +11,7 @@ import {
 } from "./schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 type loginSchema = SigninData | SignupData;
 type FormData = loginSchema;
@@ -20,11 +21,10 @@ export default function Login() {
 	const { handleSignIn, handleSignUp } = useContext(AuthContext)!; //obs o ! força dizendo que não é undefined
 	const [isLogin, setIslogin] = useState<boolean>(true);
 	const [formType, setFormType] = useState<FormType>("login");
-
+	const nav = useNavigate();
 	const schema = useMemo(() => {
 		return formType === "login" ? signinSchema : signupSchema;
 	}, [formType]);
-
 	const {
 		register,
 		handleSubmit,
@@ -33,7 +33,6 @@ export default function Login() {
 	} = useForm<SigninData | SignupData>({
 		resolver: zodResolver(schema),
 	});
-
 	function handleStatusLogin() {
 		setIslogin((prev) => {
 			const newState = !prev;
@@ -42,21 +41,20 @@ export default function Login() {
 			return newState;
 		});
 	}
-
 	function ErrorMessage({ message }: { message?: string }) {
 		return (
-			<p className="text-red-500 font-semibold w-full transition-all duration-500  max-w-96">
+			<p className="w-full max-w-96 font-semibold text-red-500 transition-all duration-500">
 				{message}
 			</p>
 		);
 	}
-
 	async function onSubmit(data: FormData) {
 		if (data === null) return;
 		if (isLogin) {
 			const login = await handleSignIn(data);
 			if (login) {
 				toast.success("Logado com sucesso!");
+				nav("/dashboard");
 				return;
 			}
 		} else if (!isLogin && formType === "signup") {
@@ -67,22 +65,21 @@ export default function Login() {
 			}
 		}
 	}
-
 	return (
 		<>
-			<main className="flex bg-zinc-900 h-dvh w-dvw p-8">
-				<section className="bg-neutral-300 mx-auto my-auto flex flex-col w-full max-w-xl rounded-t-3xl rounded-b-3xl">
-					<div className=" from-indigo-800  bg-gradient-to-bl to-blue-700   flex items-center justify-center px-2.5  py-4 rounded-t-2xl">
+			<main className="flex h-dvh w-dvw bg-zinc-900 p-8">
+				<section className="mx-auto my-auto flex w-full max-w-xl flex-col rounded-t-3xl rounded-b-3xl bg-neutral-300">
+					<div className="flex items-center justify-center rounded-t-2xl bg-gradient-to-bl from-indigo-800 to-blue-700 px-2.5 py-4">
 						<img
-							className="select-none w-28 h-[80px]"
+							className="h-[80px] w-28 select-none"
 							src={logo}
 							alt="Logo do app"
 						/>
 					</div>
-					<div className="flex  flex-col justify-center items-center px-5 py-10 w-full ">
+					<div className="flex w-full flex-col items-center justify-center px-5 py-10">
 						<form
 							key={formType}
-							className="flex flex-col w-full justify-center items-center"
+							className="flex w-full flex-col items-center justify-center"
 							onSubmit={handleSubmit(onSubmit)}
 						>
 							{formType === "signup" && (
@@ -121,7 +118,7 @@ export default function Login() {
 							<ErrorMessage message={errors.password?.message} />
 							<button
 								type="submit"
-								className="bg-blue-950 text-white font-bold text-xl h-10  w-full max-w-96 mt-3 mb-3 rounded-sm py-1 cursor-pointer hover:border-2 border-gray-400 hover:bg-blue-800 transition-all duration-500"
+								className="mt-3 mb-3 h-10 w-full max-w-96 cursor-pointer rounded-sm border-gray-400 bg-blue-950 py-1 text-xl font-bold text-white transition-all duration-500 hover:border-2 hover:bg-blue-800"
 							>
 								{isLogin ? "Acessar" : "Cadastrar"}
 							</button>
@@ -129,7 +126,7 @@ export default function Login() {
 						<button
 							type="button"
 							onClick={handleStatusLogin}
-							className=" cursor-pointer text-gray-500 transition-all duration-500 hover:text-black"
+							className="cursor-pointer text-gray-500 transition-all duration-500 hover:text-black"
 						>
 							{isLogin ? "Criar uma nova conta" : "Realizar o login"}
 						</button>

@@ -4,10 +4,13 @@ import { RouterProvider } from "react-router-dom";
 import router from "./App";
 import { AuthContextProvider } from "./contexts/auth.context";
 import { ToastContainer } from "react-toastify";
+import { AppContextProvider } from "./contexts/app.context";
 
 createRoot(document.getElementById("root")!).render(
 	<AuthContextProvider>
-		<RouterProvider router={router} />
-		<ToastContainer />
+		<AppContextProvider>
+			<RouterProvider router={router} />
+			<ToastContainer autoClose={3000} />
+		</AppContextProvider>
 	</AuthContextProvider>
 );
